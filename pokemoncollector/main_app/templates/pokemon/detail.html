@@ -1,0 +1,100 @@
+{% extends 'base.html' %} 
+{% load static %}
+
+{% block content %}
+<section class="pokemon-container">
+  <div class="pokemon-details">
+    <h1>{{ pokemon.name }}</h1>
+    <p>{{ pokemon.description }}</p>
+
+    <div class="pokemon-actions">
+      <a href="{% url 'pokemon-update' pokemon.id %}" class="btn warn">Edit</a>
+      <a href="{% url 'pokemon-delete' pokemon.id %}" class="btn danger">Delete</a>
+    </div>
+  </div>
+</section>
+<div class="feedings-toy-container">
+  <section class="feedings">
+    <div class="subsection-title">
+      <h2>Feedings</h2>
+    </div>
+
+    <h3>Add Feeding</h3>
+    <form action="{% url 'add-feeding' pokemon.id %}" method="POST" class='subsection-content'>
+      {% csrf_token %}
+      {{ feeding_form.as_p }}
+      <button type='submit' class='btn submit'>Add Feeding</button>
+    </form>
+
+    {% if pokemon.feeding_set.all.count %}
+      
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Meal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for feeding in pokemon.feeding_set.all %}
+          <tr>
+            <td>{{feeding.date}}</td>
+            <td>{{feeding.get_meal_display}}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+</div>
+    {% else %}
+      <div class='subsection-content'>
+        <p>{{ pokemon.name }} has not been fed!</p>
+      </div>
+
+    {% endif %}
+    <section class="toys">
+      <div class="subsection-title">
+        <h2>Items</h2>
+      </div>
+      <h3>{{ pokemon.name }}'s Items</h3>
+  <div class="subsection-content">
+    {% if pokemon.items.count %} 
+      {% for item in pokemon.items.all %}
+        <div class="item-container">
+          <div class="color-block" style="background-color: {{ item.color }}"></div>
+          <a href="{% url 'item-detail' item.id %}">
+            <p>A {{ item.name }}</p>
+          </a>
+        </div>
+        <form action="{% url 'remove-item' pokemon.id item.id %}" method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Remove Item</button>
+        </form>        
+      {% endfor %} 
+    {% else %}
+      <p class="no-items">{{item.name}} doesn't have any items!</p>
+    {% endif %}
+  </div>
+  <h3>Available Items</h3>
+  <div class="subsection-content">
+    {% if items.count %} 
+      {% for item in items.all %}
+        <div class="item-container">
+          <div class="color-block" style="background-color: {{ item.color }}"></div>
+          <a href="{% url 'item-detail' item.id %}">
+            <p>A {{ item.name }}</p>
+          </a>
+          <form action="{% url 'associate-item' pokemon.id item.id %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn submit">Give item</button>
+          </form>
+
+        </div>
+      {% endfor %} 
+    {% else %}
+      <p class="all-items">{{pokemon.name}} already has all the available items</p>
+    {% endif %}
+  </div>
+    </section>
+
+{% endblock %}
